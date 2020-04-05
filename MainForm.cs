@@ -29,6 +29,7 @@ namespace ZenTimings
         private readonly Ols ols;
         private CPUType cpuType = CPUType.Unsupported;
         private readonly Mutex hMutexPci;
+        private uint mclk;
 
         private void CheckOlsStatus()
         {
@@ -156,7 +157,8 @@ namespace ZenTimings
 
                 textBoxCapacity.Text = $"{(capacity / 1024 / 1024 / 1000).ToString()}GB";
                 textBoxPartNumber.Text = (string)mo["PartNumber"];
-                textBoxMCLK.Text = ((uint)mo["ConfiguredClockSpeed"]).ToString();
+                mclk = (uint)mo["ConfiguredClockSpeed"];
+                textBoxMCLK.Text = mclk.ToString();
 
                 if (searcher != null) searcher.Dispose();
                 if (mo != null) mo.Dispose();
@@ -225,7 +227,8 @@ namespace ZenTimings
             textBoxWR.Text = (num10 & 0xFF).ToString();
             textBoxRDRDSCL.Text = ((num12 & 0x3F000000) >> 24).ToString();
             textBoxWRWRSCL.Text = ((num13 & 0x3F000000) >> 24).ToString();
-            textBoxRFC.Text = (num23 & 0x7FF).ToString();
+            var rfc = num23 & 0x7FF;
+            textBoxRFC.Text = rfc.ToString();
             textBoxCWL.Text = (num9 & 0x3F).ToString();
             textBoxRTP.Text = ((num7 & 0x1F000000) >> 24).ToString();
             textBoxRDWR.Text = ((num14 & 0x1F00) >> 8).ToString();
@@ -237,6 +240,8 @@ namespace ZenTimings
             textBoxWRWRSD.Text = ((num13 & 0xF00) >> 8).ToString();
             textBoxWRWRDD.Text = (num13 & 0xF).ToString();
             textBoxCKE.Text = ((num18 & 0x1F000000) >> 24).ToString();
+
+            textBoxRFCns.Text = Math.Round(2000.0 * rfc / mclk).ToString();
 
             // VDDCR_SOC is not returning correct value
             // Same issue exists in Ryzen Master
